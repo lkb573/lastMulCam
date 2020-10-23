@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "HTTP://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="cacheEnabled" value="false" />
+		<setting name="useGeneratedKeys" value="true" />
+		<setting name="defaultExecutorType" value="REUSE" />
+	</settings>
+	
+	<typeAliases>
+		<typeAlias alias="codeVO" type="com.sds.emp.services.code.CodeVO"/>
+		<typeAlias alias="deliveryCompanyVO" type="com.sds.emp.services.purchase.DeliveryCompanyVO"/>
+		<typeAlias alias="purchaseVO" type="com.sds.emp.services.purchase.PurchaseVO"/>
+		<typeAlias alias="categoryVO" type="com.sds.emp.services.sale.CategoryVO"/>
+		<typeAlias alias="productVO" type="com.sds.emp.services.sale.ProductVO"/>
+		<typeAlias alias="saleVO" type="com.sds.emp.services.sale.SaleVO"/>
+		<typeAlias alias="userVO" type="com.sds.emp.services.user.UserVO"/>
+		<typeAlias alias="searchVO" type="com.sds.emp.common.SearchVO"/>
+	</typeAliases>
+	
+	<mappers>		 
+		<mapper resource="sql/code-codeservice-mapping.xml" />
+		<mapper resource="sql/user-userservice-mapping.xml" />
+		<mapper resource="sql/sale-productservice-mapping.xml" />		
+		<mapper resource="sql/sale-categoryservice-mapping.xml" />		
+		<mapper resource="sql/sale-saleservice-mapping.xml" />
+		<mapper resource="sql/purchase-purchaseservice-mapping.xml" />
+		<mapper resource="sql/purchase-deliverycompanyservice-mapping.xml" />
+	</mappers>
+</configuration>

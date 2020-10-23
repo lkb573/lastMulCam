@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="Category">
+	<!--  카테고리 테이블과 클래스 CategoryVO 매핑 -->
+	<resultMap id="categoryResult" type="categoryVO">
+		<id property="categoryNo" column="CATEGORY_NO" />
+		<result property="categoryName" column="CATEGORY_NAME" />
+		<result property="categoryDesc" column="CATEGORY_DESC" />
+		<result property="useYn" column="USE_YN" />
+		<result property="regId" column="REG_ID" />
+		<result property="regDate" column="REG_DATE" />
+		<result property="modifyId" column="MODIFY_ID" />
+		<result property="modifyDate" column="MODIFY_DATE" />
+	</resultMap>
+
+	<!--  Query : 검색 조건에 기반하여 카테고리 목록 조회 -->
+	<select id="getCategoryList" parameterType="categoryVO" resultMap="categoryResult">
+		SELECT CATEGORY_NO, CATEGORY_NAME, USE_YN, REG_DATE
+		FROM CATEGORY
+		<if test="categoryNo != null">
+			WHERE CATEGORY_NO like #{categoryNo} 
+		</if>
+		<if test="categoryNo == null">
+			WHERE CATEGORY_NAME like #{categoryName} 
+		</if> 
+		<if test="useYn != null">
+			AND USE_YN = #{useYn}
+		</if>
+		ORDER BY CATEGORY_NO
+	</select>
+	
+	<!--  Query : 검색 조건에 기반하여 카테고리 갯수 조회 -->
+	<select id="getCategoryListCnt" parameterType="categoryVO" resultType="java.lang.Integer">
+		SELECT COUNT(*) CNT
+		FROM CATEGORY
+		<if test="categoryNo != null">
+			WHERE CATEGORY_NO like #{categoryNo} 
+		</if>
+		<if test="categoryNo == null">
+			WHERE CATEGORY_NAME like #{categoryName} 
+		</if> 
+		<if test="useYn != null">
+			AND USE_YN = #{useYn}
+		</if>
+		ORDER BY CATEGORY_NO
+	</select>
+	
+	<!--  Query : dropdown 리스트용 카테고리 목록 조회 -->
+	<select id="getDropDownCategoryList" resultMap="categoryResult">
+		SELECT CATEGORY_NO, CATEGORY_NAME
+		FROM CATEGORY
+		WHERE USE_YN = 'Y'
+		ORDER BY CATEGORY_NO
+	</select>
+	
+	<!--  Query : 신규 카테고리 등록 -->
+	<insert id="addCategory"  parameterType="categoryVO">
+		INSERT INTO CATEGORY 
+		(CATEGORY_NO, CATEGORY_NAME, CATEGORY_DESC, USE_YN, REG_ID, REG_DATE, MODIFY_ID, MODIFY_DATE) 
+		VALUES (#{categoryNo}, #{categoryName}, #{categoryDesc}, #{useYn}, #{regId}, sysdate, #{modifyId}, sysdate)
+	</insert>	
+	
+	<!--  Query : 카테고리 정보 수정 -->	
+	<update id="updateCategory" parameterType="categoryVO">
+		UPDATE CATEGORY 
+		SET CATEGORY_NAME = #{categoryName}, 
+		    CATEGORY_DESC = #{categoryDesc}, 
+		    USE_YN =#{useYn}, 
+		    MODIFY_ID = #{modifyId}, 
+		    MODIFY_DATE = sysdate
+		WHERE CATEGORY_NO = #{categoryNo}
+	</update>	
+	
+	<!--  Query : 카테고리 상세 정보 조회 -->
+	<select id="getCategory" parameterType="java.lang.String" resultMap="categoryResult">
+		SELECT CATEGORY_NO, CATEGORY_NAME, CATEGORY_DESC, USE_YN, REG_ID, REG_DATE, MODIFY_ID, MODIFY_DATE
+		FROM CATEGORY
+		WHERE CATEGORY_NO = #{categoryNo}
+	</select>						
+
+</mapper>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="DeliveryCompany">
+	<resultMap id="deliveryCompanyResult" type="deliveryCompanyVO">
+		<id property="dlvyCompNo" column="DLVY_COMP_NO"/>
+		<result property="dlvyCompName" column="DLVY_COMP_NAME"/>
+		<result property="businessNo" column="BUSINESS_NO"/>
+		<result property="dlvyCompDesc" column="DLVY_COMP_DESC"/>
+		<result property="useYn" column="USE_YN"/>
+		<result property="regId" column="REG_ID"/>
+		<result property="regDate" column="REG_DATE"/>
+		<result property="modifyId" column="MODIFY_ID"/>
+		<result property="modifyDate" column="MODIFY_DATE"/>
+	</resultMap>
+	
+
+	<!--  Query : 검색 조건에 기반하여 배송업체 목록 조회 -->
+	<select id="getDeliveryCompanyList" parameterType="deliveryCompanyVO" resultMap="deliveryCompanyResult">
+		SELECT DLVY_COMP_NO, DLVY_COMP_NAME, BUSINESS_NO, USE_YN, REG_DATE
+		FROM DELIVERY_COMPANY
+		<if test="dlvyCompNo != null">
+			WHERE DLVY_COMP_NO like #{dlvyCompNo} 
+		</if>
+		<if test="dlvyCompNo == null">
+			WHERE DLVY_COMP_NAME like #{dlvyCompName}
+		</if> 
+		<if test="useYn != null">
+			AND USE_YN = #{useYn}
+		</if> 
+		ORDER BY DLVY_COMP_NO DESC
+	</select>
+	
+	<!--  Query : 검색 조건에 기반하여 배송업체 갯수 조회 -->
+	<select id="getDeliveryCompanyListCnt" parameterType="deliveryCompanyVO" resultType="java.lang.Integer">
+		SELECT COUNT(*) CNT
+		FROM DELIVERY_COMPANY
+		<if test="dlvyCompNo != null">
+			WHERE DLVY_COMP_NO like #{dlvyCompNo} 
+		</if>
+		<if test="dlvyCompNo == null">
+			WHERE DLVY_COMP_NAME like #{dlvyCompName}
+		</if> 
+		<if test="useYn != null">
+			AND USE_YN = #{useYn}
+		</if> 
+	</select>
+
+	<!--  Query : 신규 배송업체 등록 -->
+	<insert id="addDeliveryCompany" parameterType="deliveryCompanyVO" >
+		INSERT INTO DELIVERY_COMPANY 
+		(DLVY_COMP_NO, DLVY_COMP_NAME, BUSINESS_NO, DLVY_COMP_DESC, USE_YN, REG_ID, REG_DATE, MODIFY_ID, MODIFY_DATE) 
+		VALUES (#{dlvyCompNo}, #{dlvyCompName}, #{businessNo}, #{dlvyCompDesc}, #{useYn}, #{regId}, sysdate, #{modifyId}, sysdate)
+	</insert>	
+	
+	<!--  Query : 배송업체 정보 수정 -->	
+	<update id="updateDeliveryCompany" parameterType="deliveryCompanyVO" >
+		UPDATE DELIVERY_COMPANY 
+		SET DLVY_COMP_NAME = #{dlvyCompName}, BUSINESS_NO = #{businessNo}, DLVY_COMP_DESC = #{dlvyCompDesc}, USE_YN =#{useYn}, MODIFY_ID = #{modifyId}, MODIFY_DATE = sysdate
+		WHERE DLVY_COMP_NO = #{dlvyCompNo}
+	</update>	
+	
+	<!--  Query : 배송업체 상세 정보 조회 -->
+	<select id="getDeliveryCompany" parameterType="deliveryCompanyVO" resultMap="deliveryCompanyResult">
+		SELECT DLVY_COMP_NO, DLVY_COMP_NAME, BUSINESS_NO, DLVY_COMP_DESC, USE_YN, REG_ID, REG_DATE, MODIFY_ID, MODIFY_DATE
+		FROM DELIVERY_COMPANY
+		WHERE DLVY_COMP_NO = #{dlvyCompNo}		
+	</select>
+</mapper>

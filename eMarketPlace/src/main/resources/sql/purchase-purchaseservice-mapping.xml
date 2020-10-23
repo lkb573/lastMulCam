@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd"> 
+
+<mapper namespace="Purchase">
+	<resultMap id="purchaseResult" type="purchaseVO">
+		<result property="prodNo" column="PROD_NO" />
+		<result property="tranNo" column="TRAN_NO" />
+		<result property="prodName" column="PROD_NAME" />
+		<result property="categoryNo" column="CATEGORY_NO" />
+		<result property="categoryName" column="CATEGORY_NAME" />
+		<result property="manufactureDay" column="MANUFACTURE_DAY" />
+		<result property="prodDetail" column="PROD_DETAIL" />
+		<result property="sellQuantity" column="SELL_QUANTITY" />
+		<result property="sellAmount" column="SELL_AMOUNT"/>
+		<result property="asYn" column="AS_YN" />
+		<result property="sellerId" column="SELLER_ID" />
+		<result property="buyerId" column="BUYER_ID" />
+		<result property="buyerName" column="BUYER_NAME" />
+		<result property="receiverId" column="RECEIVER_ID" />
+		<result property="receiverName" column="RECEIVER_NAME" />
+		<result property="receiverPhone" column="RECEIVER_PHONE" />
+		<result property="dlvyExpectDay" column="DLVY_EXPECT_DAY" />
+		<result property="dlvyAddr" column="DLVY_ADDR" />
+		<result property="dlvyCompNo" column="DLVY_COMP_NO" />
+		<result property="dlvyCompName" column="DLVY_COMP_NAME" />
+		<result property="dlvyRequest" column="DLVY_REQUEST" />
+		<result property="paymentOption" column="PAYMENT_OPTION" />
+		<result property="paymentOptionName" column="PAYMENT_OPTION_NAME" />
+		<result property="receiptYn" column="RECEIPT_YN" />
+		<result property="tranStatusCode" column="TRAN_STATUS_CODE" />
+		<result property="tranStatusCodeName" column="TRAN_STATUS_CODE_NAME" />
+		<result property="imageFile" column="IMAGE_FILE" />
+		<result property="regDate" column="REG_DATE" />
+		<result property="orderDate" column="ORDER_DATE" />
+		<result property="dlvyDate" column="DLVY_DATE" />
+	</resultMap>		
+
+	<!--  Query : 특정 배송업체가 포함된 주문 목록 조회 -->
+	<select id="getPurchaseListByDeliveryCompany" parameterType="java.lang.String" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM TRANSACTION
+		WHERE DLVY_COMP_NO = #{dlvyCompNo}
+	</select> 				  
+			  
+	<!--  Query : 검색 조건에 기반하여 구매 목록 조회 -->
+	<select id="getPurchaseList" parameterType="purchaseVO" resultMap="purchaseResult">
+		SELECT B.TRAN_NO, A.PROD_NO, A.PROD_NAME, A.SELL_AMOUNT, 
+		       A.TRAN_STATUS_CODE as TRAN_STATUS_CODE, A.SELLER_ID as SELLER_ID, A.REG_DATE as REG_DATE, C.CODE_NAME as TRAN_STATUS_CODE_NAME
+		FROM PRODUCT A, TRANSACTION B,
+			(SELECT CODE_TYPE, CODE, CODE_NAME FROM CODE WHERE CODE_TYPE = 'A03') C
+		WHERE A.PROD_NO = B.PROD_NO
+		  AND A.TRAN_STATUS_CODE = C.CODE 
+		<if test="prodNo != null">			
+		  AND A.PROD_NO like #{prodNo}
+		</if>	
+		<if test="prodNo == null">	
+		  AND A.PROD_NAME like #{prodName}
+		</if>
+		<if test="tranStatusCode != null">	
+		  AND A.TRAN_STATUS_CODE = #{tranStatusCode}			
+		</if>				
+		  AND BUYER_ID like #{buyerId}
+	</select> 
+	
+	<!--  Query : 검색 조건에 기반하여 구매 목록 갯수 조회 -->
+	<select id="getPurchaseListCnt" parameterType="purchaseVO" resultType="java.lang.Integer">
+		SELECT COUNT(*) CNT
+		FROM PRODUCT A, TRANSACTION B,
+			(SELECT CODE_TYPE, CODE, CODE_NAME FROM CODE WHERE CODE_TYPE = 'A03') C
+		WHERE A.PROD_NO = B.PROD_NO
+		  AND A.TRAN_STATUS_CODE = C.CODE 
+		<if test="prodNo != null">			
+		  AND A.PROD_NO like #{prodNo}
+		</if>	
+		<if test="prodNo == null">	
+		  AND A.PROD_NAME like #{prodName}
+		</if>
+		<if test="tranStatusCode != null">	
+		  AND A.TRAN_STATUS_CODE = #{tranStatusCode}			
+		</if>				
+		  AND BUYER_ID like #{buyerId}
+	</select> 
+
+	<!--  Query : 거래상태코드(상품) 수정 -->	
+	<update id="updateProdTranStatusCode" parameterType="purchaseVO">
+		UPDATE PRODUCT 
+		SET TRAN_STATUS_CODE = #{tranStatusCode}
+		WHERE PROD_NO = #{prodNo}
+	</update>
+	
+	<!--  Query : 거래상태코드(거래) 수정 -->	
+	<update id="updateTranStatusCode" parameterType="purchaseVO">
+		UPDATE TRANSACTION 
+		SET TRAN_STATUS_CODE = #{tranStatusCode}
+		WHERE TRAN_NO = #{tranNo}
+	</update>
+		 
+	<!--  Query : 구매 상세 정보 조회 -->
+	<select id="getPurchase" parameterType="java.lang.String" resultMap="purchaseResult">
+		SELECT	A.PROD_NO PROD_NO, 
+			TRAN_NO,
+			PROD_NAME, 
+			CATEGORY_NO, 
+			(SELECT CATEGORY_NAME FROM CATEGORY WHERE CATEGORY_NO = A.CATEGORY_NO) as CATEGORY_NAME,
+			MANUFACTURE_DAY, 
+			PROD_DETAIL, 
+			SELL_QUANTITY, 
+			SELL_AMOUNT,
+			AS_YN,
+			A.SELLER_ID SELLER_ID,
+			BUYER_ID, 
+			(SELECT USER_NAME FROM USERS WHERE USER_ID = B.BUYER_ID) as BUYER_NAME, 
+			RECEIVER_ID, 
+			(SELECT USER_NAME FROM USERS WHERE USER_ID = B.RECEIVER_ID) as RECEIVER_NAME,
+			RECEIVER_PHONE, 
+			DLVY_EXPECT_DAY, 
+			DLVY_ADDR, 
+			DLVY_COMP_NO, 
+			(SELECT DLVY_COMP_NAME FROM DELIVERY_COMPANY WHERE DLVY_COMP_NO = B.DLVY_COMP_NO) DLVY_COMP_NAME,
+			DLVY_REQUEST, 
+			PAYMENT_OPTION, 
+			D.CODE_NAME PAYMENT_OPTION_NAME,
+			RECEIPT_YN,
+			B.TRAN_STATUS_CODE TRAN_STATUS_CODE,
+			C.CODE_NAME TRAN_STATUS_CODE_NAME,
+			IMAGE_FILE
+		FROM PRODUCT A, TRANSACTION B,
+			(SELECT CODE_TYPE, CODE, CODE_NAME FROM CODE WHERE CODE_TYPE = 'A03') C,
+			(SELECT CODE_TYPE, CODE, CODE_NAME FROM CODE WHERE CODE_TYPE = 'A04') D
+		WHERE A.PROD_NO = B.PROD_NO
+			AND B.TRAN_NO = #{tranNo}
+			AND B.TRAN_STATUS_CODE = C.CODE(+)
+			AND B.PAYMENT_OPTION = D.CODE(+)
+	</select>	
+	
+	<!--  Query : 신규  주문  등록 -->
+	<insert id="addPurchase" parameterType="purchaseVO">
+		INSERT INTO TRANSACTION 
+		(TRAN_NO, PROD_NO, SELLER_ID, BUYER_ID, RECEIPT_YN, 
+		PAYMENT_OPTION, RECEIVER_ID, RECEIVER_PHONE, DLVY_EXPECT_DAY, DLVY_ADDR, 
+		DLVY_COMP_NO, DLVY_REQUEST, TRAN_STATUS_CODE, ORDER_DATE) 
+		VALUES (
+		#{tranNo}, #{prodNo}, #{sellerId}, #{buyerId}, #{receiptYn}, 
+		#{paymentOption}, #{receiverId}, #{receiverPhone}, #{dlvyExpectDay}, #{dlvyAddr}, 
+		#{dlvyCompNo}, #{dlvyRequest}, #{tranStatusCode}, sysdate)
+	</insert>	
+	
+	<!--  Query : 주문 정보 수정 -->	
+	<update id="updatePurchase" parameterType="purchaseVO">
+		UPDATE TRANSACTION
+		SET RECEIPT_YN = #{receiptYn}, PAYMENT_OPTION = #{paymentOption}, RECEIVER_ID = #{receiverId}, RECEIVER_PHONE = #{receiverPhone}, 
+		DLVY_EXPECT_DAY = #{dlvyExpectDay}, DLVY_ADDR = #{dlvyAddr}, DLVY_COMP_NO = #{dlvyCompNo}, DLVY_REQUEST = #{dlvyRequest}
+		WHERE TRAN_NO = #{tranNo}
+	</update>	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
